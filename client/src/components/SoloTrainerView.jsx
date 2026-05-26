@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { io } from "socket.io-client";
 import { BACKEND_URL } from "../App";
-import AcademyView from "./Academy/AcademyView";
-import FormattingView from "./Formatting/FormattingView";
 import { calculateSchoolGrade } from "../utils/grading";
 
 const EN_KEYBOARD = [
@@ -406,11 +404,11 @@ function SoloTypingView({ textData, language, isMuted, onFinish, onBack, sharedL
 }
 
 // ─────────────────────────────────────────────────────────────
-// Main StudentArena component
+// Main SoloTrainerView component
 // ─────────────────────────────────────────────────────────────
-function StudentArena({ onBackHome }) {
+function SoloTrainerView({ onBackHome }) {
   // Tab: "battle" | "solo"
-  const [activeTab, setActiveTab] = useState("battle");
+  const [activeTab, setActiveTab] = useState("solo");
 
   // ── Battle Mode states ──────────────────────────────────────
   const [step, setStep] = useState("join"); // join | waiting | countdown | typing | finished
@@ -682,45 +680,17 @@ function StudentArena({ onBackHome }) {
     );
   }
 
-  // If in Academy mode, render the Academy View
-  if (activeTab === "academy") {
-    return (
-      <div className="arena-layout" style={{ maxWidth: "96%", width: "96%" }}>
-        <div className="mode-tabs">
-          <button className={`mode-tab ${activeTab === "battle" ? "active" : ""}`} onClick={() => setActiveTab("battle")}>⚔️ Приєднатись до змагання</button>
-          <button className={`mode-tab ${activeTab === "solo" ? "active" : ""}`} onClick={() => setActiveTab("solo")}>🎯 Самостійне тренування</button>
-          <button className={`mode-tab ${activeTab === "academy" ? "active" : ""}`} onClick={() => setActiveTab("academy")}>📝 Академія набору</button>
-          <button className={`mode-tab ${activeTab === "formatting" ? "active" : ""}`} onClick={() => setActiveTab("formatting")}>🖊️ Форматування</button>
-        </div>
-        <AcademyView />
-      </div>
-    );
-  }
+  // Render ─────────────────────────────────────────────────────
 
-  // If in Formatting mode, render the Formatting View
-  if (activeTab === "formatting") {
-    return (
-      <div className="arena-layout" style={{ maxWidth: "96%", width: "96%" }}>
-        <div className="mode-tabs">
-          <button className={`mode-tab ${activeTab === "battle" ? "active" : ""}`} onClick={() => setActiveTab("battle")}>⚔️ Приєднатись до змагання</button>
-          <button className={`mode-tab ${activeTab === "solo" ? "active" : ""}`} onClick={() => setActiveTab("solo")}>🎯 Самостійне тренування</button>
-          <button className={`mode-tab ${activeTab === "academy" ? "active" : ""}`} onClick={() => setActiveTab("academy")}>📝 Академія набору</button>
-          <button className={`mode-tab ${activeTab === "formatting" ? "active" : ""}`} onClick={() => setActiveTab("formatting")}>🖊️ Форматування</button>
-        </div>
-        <FormattingView />
-      </div>
-    );
-  }
+
 
   return (
     <div className="arena-layout">
-      {/* ── Tab switcher (only on entry screen) ── */}
+      {/* ── Sub-tabs for Trainer (only on entry screen) ── */}
       {(step === "join" || activeTab === "solo") && soloStep !== "done" && (
-        <div className="mode-tabs">
-          <button className={`mode-tab ${activeTab === "battle" ? "active" : ""}`} onClick={() => setActiveTab("battle")}>⚔️ Приєднатись до змагання</button>
-          <button className={`mode-tab ${activeTab === "solo" ? "active" : ""}`} onClick={() => setActiveTab("solo")}>🎯 Самостійне тренування</button>
-          <button className={`mode-tab ${activeTab === "academy" ? "active" : ""}`} onClick={() => setActiveTab("academy")}>📝 Академія набору</button>
-          <button className={`mode-tab ${activeTab === "formatting" ? "active" : ""}`} onClick={() => setActiveTab("formatting")}>🖊️ Форматування</button>
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginBottom: "1.5rem" }}>
+          <button className={`btn ${activeTab === "solo" ? "btn-primary" : "btn-secondary"}`} style={{ borderRadius: "20px", padding: "0.5rem 1.5rem" }} onClick={() => setActiveTab("solo")}>🎯 Самостійне тренування</button>
+          <button className={`btn ${activeTab === "battle" ? "btn-primary" : "btn-secondary"}`} style={{ borderRadius: "20px", padding: "0.5rem 1.5rem" }} onClick={() => setActiveTab("battle")}>⚔️ Групове змагання</button>
         </div>
       )}
 
@@ -1138,4 +1108,4 @@ function StudentArena({ onBackHome }) {
   );
 }
 
-export default StudentArena;
+export default SoloTrainerView;

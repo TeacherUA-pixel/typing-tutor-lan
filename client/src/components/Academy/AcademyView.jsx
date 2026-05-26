@@ -9,6 +9,7 @@ export default function AcademyView() {
   const [selectedLessonId, setSelectedLessonId] = useState(null);
   const [inputText, setInputText] = useState("");
   const [result, setResult] = useState(null);
+  const editorRef = useRef(null);
   
   // Progress tracking
   const [completedLessons, setCompletedLessons] = useState([]);
@@ -151,7 +152,12 @@ export default function AcademyView() {
     const exercise = sessionExercises[activeExerciseIdx] || (sessionExercises.length > 0 ? sessionExercises[0] : null);
     if (!exercise) return;
     
-    const verification = verifyText(exercise.template, inputText);
+    let textToVerify = inputText;
+    if (exercise.type === "rich-text" && editorRef.current) {
+      textToVerify = editorRef.current.innerHTML;
+    }
+    
+    const verification = verifyText(exercise.template, textToVerify);
     setResult(verification);
     setStep("result");
     
@@ -194,7 +200,7 @@ export default function AcademyView() {
     return (
       <div className="glass-panel" style={{ padding: "1.5rem 2rem", width: "100%", maxWidth: "100%", margin: "0 auto", display: "flex", flexDirection: "column", maxHeight: "100%", overflow: "hidden" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", flexShrink: 0, gap: "1rem", flexWrap: "wrap" }}>
-          <h2 style={{ fontSize: "1.6rem", margin: 0 }}>📝 Академія набору тексту</h2>
+          <h2 style={{ fontSize: "1.6rem", margin: 0 }}>📝 Тренажер текстового редактора</h2>
           <div style={{ fontSize: "0.9rem", color: "var(--text-secondary)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <span>Учень: <strong>{studentName}</strong></span>
             <button 
@@ -214,48 +220,104 @@ export default function AcademyView() {
           Навчіться правильно оформлювати текст. Пройдіть уроки, щоб зрозуміти правила набору, використання пробілів та розділових знаків.
         </p>
         
-        <div className="scrollable" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(clamp(170px, 15vw, 210px), 1fr))", gap: "0.8rem", flex: 1, overflowY: "auto", paddingRight: "0.5rem", paddingBottom: "0.5rem" }}>
-          {ACADEMY_LESSONS.map((lesson, idx) => {
-            const isCompleted = completedLessons.includes(lesson.id);
-            return (
-              <div 
-                key={lesson.id} 
-                className={`glass-panel lesson-card ${isCompleted ? 'lesson-completed' : ''}`}
-                style={{ 
-                  padding: "clamp(0.6rem, 1vh, 0.9rem) clamp(0.8rem, 1vw, 1.1rem)", 
-                  display: "flex", 
-                  flexDirection: "column",
-                  justifyContent: "space-between", 
-                  alignItems: "flex-start",
-                  gap: "0.4rem",
-                  background: isCompleted ? "rgba(34, 197, 94, 0.1)" : "rgba(255,255,255,0.05)",
-                  border: isCompleted ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid var(--card-border)",
-                  cursor: "pointer",
-                  minHeight: "clamp(85px, 11vh, 105px)",
-                  height: "auto"
-                }}
-                onClick={() => handleLessonSelect(lesson.id)}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-                  <div style={{ fontSize: "clamp(0.7rem, 0.9vw, 0.8rem)", color: "var(--primary)", fontWeight: "800", textTransform: "uppercase" }}>
-                    Урок {idx + 1}
+        <div className="scrollable" style={{ display: "flex", flexDirection: "column", gap: "1.5rem", flex: 1, overflowY: "auto", paddingRight: "0.5rem", paddingBottom: "0.5rem" }}>
+          
+          <div>
+            <h3 style={{ fontSize: "1.1rem", marginBottom: "0.8rem", color: "var(--primary)", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.4rem" }}>📚 Правила набору тексту</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(clamp(170px, 15vw, 210px), 1fr))", gap: "0.8rem" }}>
+              {ACADEMY_LESSONS.filter(l => l.category === "rules").map((lesson) => {
+                const globalIdx = ACADEMY_LESSONS.findIndex(l => l.id === lesson.id);
+                const isCompleted = completedLessons.includes(lesson.id);
+                return (
+                  <div 
+                    key={lesson.id} 
+                    className={`glass-panel lesson-card ${isCompleted ? 'lesson-completed' : ''}`}
+                    style={{ 
+                      padding: "clamp(0.6rem, 1vh, 0.9rem) clamp(0.8rem, 1vw, 1.1rem)", 
+                      display: "flex", 
+                      flexDirection: "column",
+                      justifyContent: "space-between", 
+                      alignItems: "flex-start",
+                      gap: "0.4rem",
+                      background: isCompleted ? "rgba(34, 197, 94, 0.1)" : "rgba(255,255,255,0.05)",
+                      border: isCompleted ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid var(--card-border)",
+                      cursor: "pointer",
+                      minHeight: "clamp(85px, 11vh, 105px)",
+                      height: "auto"
+                    }}
+                    onClick={() => handleLessonSelect(lesson.id)}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                      <div style={{ fontSize: "clamp(0.7rem, 0.9vw, 0.8rem)", color: "var(--primary)", fontWeight: "800", textTransform: "uppercase" }}>
+                        Урок {globalIdx + 1}
+                      </div>
+                      <div style={{ fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)" }}>
+                        {isCompleted ? "✅" : "➡️"}
+                      </div>
+                    </div>
+                    <div style={{ width: "100%" }}>
+                      <h3 style={{ fontSize: "clamp(0.92rem, 1.1vw, 1.05rem)", marginBottom: "0.2rem", lineHeight: "1.25", fontWeight: "700" }}>
+                        {lesson.title}
+                      </h3>
+                      <div style={{ fontSize: "clamp(0.7rem, 0.8vw, 0.78rem)", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                        <span style={{ display: "inline-block", width: "5px", height: "5px", borderRadius: "50%", background: lesson.level === 1 ? "var(--success)" : lesson.level === 2 ? "var(--warning)" : "var(--error)" }}></span>
+                        Рівень {lesson.level}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)" }}>
-                    {isCompleted ? "✅" : "➡️"}
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <h3 style={{ fontSize: "1.1rem", marginBottom: "0.8rem", color: "var(--primary)", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.4rem" }}>🎨 Зміна зовнішнього вигляду (Форматування)</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(clamp(170px, 15vw, 210px), 1fr))", gap: "0.8rem" }}>
+              {ACADEMY_LESSONS.filter(l => l.category === "formatting").map((lesson) => {
+                const globalIdx = ACADEMY_LESSONS.findIndex(l => l.id === lesson.id);
+                const isCompleted = completedLessons.includes(lesson.id);
+                return (
+                  <div 
+                    key={lesson.id} 
+                    className={`glass-panel lesson-card ${isCompleted ? 'lesson-completed' : ''}`}
+                    style={{ 
+                      padding: "clamp(0.6rem, 1vh, 0.9rem) clamp(0.8rem, 1vw, 1.1rem)", 
+                      display: "flex", 
+                      flexDirection: "column",
+                      justifyContent: "space-between", 
+                      alignItems: "flex-start",
+                      gap: "0.4rem",
+                      background: isCompleted ? "rgba(34, 197, 94, 0.1)" : "rgba(255,255,255,0.05)",
+                      border: isCompleted ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid var(--card-border)",
+                      cursor: "pointer",
+                      minHeight: "clamp(85px, 11vh, 105px)",
+                      height: "auto"
+                    }}
+                    onClick={() => handleLessonSelect(lesson.id)}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                      <div style={{ fontSize: "clamp(0.7rem, 0.9vw, 0.8rem)", color: "var(--primary)", fontWeight: "800", textTransform: "uppercase" }}>
+                        Урок {globalIdx + 1}
+                      </div>
+                      <div style={{ fontSize: "clamp(0.95rem, 1.2vw, 1.1rem)" }}>
+                        {isCompleted ? "✅" : "➡️"}
+                      </div>
+                    </div>
+                    <div style={{ width: "100%" }}>
+                      <h3 style={{ fontSize: "clamp(0.92rem, 1.1vw, 1.05rem)", marginBottom: "0.2rem", lineHeight: "1.25", fontWeight: "700" }}>
+                        {lesson.title}
+                      </h3>
+                      <div style={{ fontSize: "clamp(0.7rem, 0.8vw, 0.78rem)", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                        <span style={{ display: "inline-block", width: "5px", height: "5px", borderRadius: "50%", background: lesson.level === 1 ? "var(--success)" : lesson.level === 2 ? "var(--warning)" : "var(--error)" }}></span>
+                        Рівень {lesson.level}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div style={{ width: "100%" }}>
-                  <h3 style={{ fontSize: "clamp(0.92rem, 1.1vw, 1.05rem)", marginBottom: "0.2rem", lineHeight: "1.25", fontWeight: "700" }}>
-                    {lesson.title}
-                  </h3>
-                  <div style={{ fontSize: "clamp(0.7rem, 0.8vw, 0.78rem)", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-                    <span style={{ display: "inline-block", width: "5px", height: "5px", borderRadius: "50%", background: lesson.level === 1 ? "var(--success)" : lesson.level === 2 ? "var(--warning)" : "var(--error)" }}></span>
-                    Рівень {lesson.level}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          </div>
+
         </div>
       </div>
     );
@@ -354,7 +416,7 @@ export default function AcademyView() {
         <div className="glass-panel" style={{ padding: "1rem 1.2rem", flexShrink: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
             <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "700" }}>
-              {exercise.type === "edit" ? "📋 Текст для порівняння (Еталон):" : "📋 Шаблон (наберіть точно так само):"}
+              {exercise.type === "edit" ? "📋 Текст для порівняння (Еталон):" : exercise.type === "rich-text" ? "📋 Завдання (зробіть так само):" : "📋 Шаблон (наберіть точно так само):"}
             </div>
             <button
               className="btn btn-secondary"
@@ -379,7 +441,10 @@ export default function AcademyView() {
           }}>
             {/* Пробіли рендеримо як виділений блок-фон, а не крапку,
                 щоб при переносі рядка вони не з'являлись на початку наступного */}
-            {exercise.template.split('\n').map((line, lineIdx, lines) => (
+            {exercise.type === "rich-text" ? (
+              <div dangerouslySetInnerHTML={{ __html: exercise.template }} />
+            ) : (
+              exercise.template.split('\n').map((line, lineIdx, lines) => (
               <React.Fragment key={lineIdx}>
                 {line.split('').map((char, charIdx) =>
                   char === ' '
@@ -397,35 +462,64 @@ export default function AcademyView() {
                   <span style={{ color: "var(--primary)", opacity: 0.6 }}>↵<br/></span>
                 )}
               </React.Fragment>
-            ))}
+            )))}
           </div>
         </div>
 
         <div className="glass-panel" style={{ padding: "1rem 1.2rem", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
           <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem", fontWeight: "700", flexShrink: 0 }}>
-            {exercise.type === "edit" ? "✏️ Виправте помилки тут:" : "Ваше введення:"}
+            {exercise.type === "edit" ? "✏️ Виправте помилки тут:" : exercise.type === "rich-text" ? "✏️ Форматуйте текст тут:" : "Ваше введення:"}
           </div>
-          <textarea 
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            style={{
-              flex: 1,
-              width: "100%",
-              minHeight: "100px",
-              background: "rgba(0,0,0,0.1)",
-              border: "1px solid var(--card-border)",
-              borderRadius: "8px",
-              padding: "0.8rem 1rem",
-              fontFamily: "var(--font-mono)",
-              fontSize: "1.15rem",
-              lineHeight: "1.5",
-              color: "var(--text-primary)",
-              resize: "none",
-              outline: "none"
-            }}
-            placeholder="Почніть набирати текст тут..."
-            autoFocus
-          />
+
+          {exercise.type === "rich-text" ? (
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: "100px" }}>
+              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                <button className="btn btn-secondary" style={{ fontWeight: "bold" }} onClick={() => document.execCommand("bold", false, null)}>Ж</button>
+                <button className="btn btn-secondary" style={{ fontStyle: "italic" }} onClick={() => document.execCommand("italic", false, null)}>К</button>
+                <button className="btn btn-secondary" style={{ textDecoration: "underline" }} onClick={() => document.execCommand("underline", false, null)}>Ч</button>
+              </div>
+              <div 
+                ref={editorRef}
+                contentEditable
+                dangerouslySetInnerHTML={{ __html: exercise.initial || "" }}
+                style={{
+                  flex: 1,
+                  background: "rgba(0,0,0,0.1)",
+                  border: "1px solid var(--card-border)",
+                  borderRadius: "8px",
+                  padding: "0.8rem 1rem",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "1.15rem",
+                  lineHeight: "1.5",
+                  color: "var(--text-primary)",
+                  outline: "none",
+                  overflowY: "auto"
+                }}
+              />
+            </div>
+          ) : (
+            <textarea 
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              style={{
+                flex: 1,
+                width: "100%",
+                minHeight: "100px",
+                background: "rgba(0,0,0,0.1)",
+                border: "1px solid var(--card-border)",
+                borderRadius: "8px",
+                padding: "0.8rem 1rem",
+                fontFamily: "var(--font-mono)",
+                fontSize: "1.15rem",
+                lineHeight: "1.5",
+                color: "var(--text-primary)",
+                resize: "none",
+                outline: "none"
+              }}
+              placeholder="Почніть набирати текст тут..."
+              autoFocus
+            />
+          )}
         </div>
 
         <div style={{ display: "flex", justifyContent: "center", flexShrink: 0 }}>

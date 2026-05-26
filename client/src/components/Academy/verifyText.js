@@ -1,4 +1,12 @@
-export function verifyText(template, input) {
+export function verifyText(template, rawInput) {
+  // Normalize HTML tags for rich-text exercises
+  let input = rawInput || "";
+  input = input.replace(/<strong[^>]*>/gi, '<b>').replace(/<\/strong>/gi, '</b>');
+  input = input.replace(/<em[^>]*>/gi, '<i>').replace(/<\/em>/gi, '</i>');
+  input = input.replace(/<span style="font-weight: bold;">/gi, '<b>').replace(/<\/span>/gi, '</b>');
+  // Optional: remove non-breaking spaces
+  input = input.replace(/&nbsp;/g, ' ');
+
   let errors = [];
   let diff = [];
   
