@@ -1,0 +1,19 @@
+[
+  {
+    "id": "game_1779708829997_1858",
+    "date": "2026-05-25T11:33:49.997Z",
+    "roomCode": "1858",
+    "language": "ua",
+    "textTitle": "Прості слова",
+    "results": [
+      {
+        "name": "Іванов",
+        "wpm": 26,
+        "accuracy": 100,
+        "progress": 100,
+        "finished": true,
+        "rank": 1
+      }
+    ]
+  }
+]

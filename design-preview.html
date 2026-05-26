@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Neumorphic Preview — KeyMaster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Design tokens ── */
+    :root {
+      --bg:        #e8ecf0;
+      --shadow-d:  #c5cad3;  /* dark shadow  */
+      --shadow-l:  #ffffff;  /* light shadow */
+      --text:      #3d4451;
+      --muted:     #8a9bb0;
+      --accent:    #6366f1;
+      --accent-bg: #dde1f7;
+      --success:   #10b981;
+      --error:     #f43f5e;
+
+      /* raised element */
+      --raise: 3px 3px 7px var(--shadow-d), -3px -3px 7px var(--shadow-l);
+      /* pressed / inset */
+      --press: inset 2px 2px 5px var(--shadow-d), inset -2px -2px 5px var(--shadow-l);
+      /* subtle raise */
+      --raise-sm: 1.5px 1.5px 4px var(--shadow-d), -1.5px -1.5px 4px var(--shadow-l);
+
+      --radius: 16px;
+      --font: 'Outfit', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+      gap: 2.5rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+    h1 span { color: var(--accent); }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    /* ────────────────────────────── */
+    /* TABS                          */
+    /* ────────────────────────────── */
+    .tabs-wrap {
+      background: var(--bg);
+      box-shadow: var(--press);
+      border-radius: 999px;
+      padding: 5px;
+      display: inline-flex;
+      gap: 4px;
+    }
+    .tab {
+      padding: 0.55rem 1.4rem;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab.active {
+      background: var(--bg);
+      box-shadow: var(--raise-sm);
+      color: var(--accent);
+    }
+
+    /* ────────────────────────────── */
+    /* STAT BOXES                    */
+    /* ────────────────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      background: var(--bg);
+      box-shadow: var(--press);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      min-width: 110px;
+    }
+    .stat-val {
+      font-family: var(--mono);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-val.accent { color: var(--accent); }
+    .stat-val.ok     { color: var(--success); }
+    .stat-lbl {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    /* ────────────────────────────── */
+    /* TYPING AREA                   */
+    /* ────────────────────────────── */
+    .typing-area {
+      background: var(--bg);
+      box-shadow: var(--press);
+      border-radius: var(--radius);
+      padding: 3.6rem 4rem;
+      width: 85%;
+      max-width: 85%;
+      margin: 0 auto;
+      font-family: var(--mono);
+      font-size: 2.3rem;
+      line-height: 2.2;
+      letter-spacing: 0.02em;
+    }
+    .char { color: var(--muted); }
+    .char.done { color: var(--success); }
+    .char.cursor {
+      color: var(--accent);
+      border-bottom: 2.5px solid var(--accent);
+    }
+
+    /* progress bar */
+    .progress-wrap {
+      width: 100%;
+      max-width: 100%;
+      background: var(--bg);
+      box-shadow: var(--press);
+      border-radius: 999px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      width: 38%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), #818cf8);
+      transition: width 0.3s ease;
+    }
+
+    /* ────────────────────────────── */
+    /* BUTTONS                       */
+    /* ────────────────────────────── */
+    .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .btn {
+      padding: 0.8rem 2rem;
+      border-radius: 999px;
+      border: none;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-primary {
+      background: var(--bg);
+      box-shadow: var(--raise);
+      color: var(--accent);
+    }
+    .btn-primary:active {
+      box-shadow: var(--press);
+    }
+    .btn-accent {
+      background: var(--accent);
+      box-shadow: 6px 6px 14px rgba(99,102,241,0.4), -3px -3px 8px #fff;
+      color: #fff;
+    }
+    .btn-accent:active {
+      box-shadow: inset 3px 3px 8px rgba(0,0,0,0.25), inset -2px -2px 5px rgba(255,255,255,0.15);
+    }
+
+    /* ────────────────────────────── */
+    /* KEYBOARD                      */
+    /* ────────────────────────────── */
+    .keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+    .key-row { display: flex; gap: 5px; }
+    .key {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--bg);
+      box-shadow: var(--raise-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .key.active {
+      box-shadow: inset 2px 2px 5px #a8cfc4, inset -2px -2px 5px #e2f5f0;
+      background: #edf7f4;
+      color: #0d9e7a;
+      font-weight: 800;
+    }
+    .key.space-key {
+      width: 220px;
+      height: 42px;
+      border-radius: 10px;
+    }
+
+    /* ────────────────────────────── */
+    /* INPUT FIELD                   */
+    /* ────────────────────────────── */
+    .input-field {
+      background: var(--bg);
+      box-shadow: var(--press);
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.85rem 1.2rem;
+      font-family: var(--font);
+      font-size: 1rem;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+      max-width: 400px;
+    }
+    .input-field::placeholder { color: var(--muted); }
+
+    /* difficulty buttons */
+    .diff-row { display: flex; gap: 0.8rem; }
+    .diff-btn {
+      padding: 0.7rem 1.3rem;
+      border-radius: 12px;
+      border: none;
+      background: var(--bg);
+      box-shadow: var(--raise-sm);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .diff-btn.active {
+      box-shadow: var(--press);
+      color: var(--accent);
+    }
+
+    /* divider */
+    hr {
+      border: none;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      width: 100%;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Key<span>Master</span></h1>
+
+  <!-- TABS -->
+  <div>
+    <div class="section-label">Режим</div>
+    <div class="tabs-wrap">
+      <button class="tab active">⚔️ Змагання</button>
+      <button class="tab">🎯 Тренування</button>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- STATS -->
+  <div>
+    <div class="section-label">Статистика (увігнуті)</div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-val">87</span>
+        <span class="stat-lbl">WPM</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val ok">96%</span>
+        <span class="stat-lbl">Точність</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val accent">38%</span>
+        <span class="stat-lbl">Прогрес</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val" style="font-size:1.3rem">0:42</span>
+        <span class="stat-lbl">Час</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div style="width:100%;max-width:100%">
+    <div class="section-label">Прогрес-бар</div>
+    <div class="progress-wrap">
+      <div class="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- TYPING AREA -->
+  <div style="width:100%;max-width:100%">
+    <div class="section-label">Поле набору тексту (увігнуте)</div>
+    <div class="typing-area">
+      <span class="char done">С</span><span class="char done">о</span><span class="char done">н</span><span class="char done">ц</span><span class="char done">е</span><span class="char done"> </span><span class="char done">с</span><span class="char done">в</span><span class="char done">і</span><span class="char done">т</span><span class="char done">и</span><span class="char done">т</span><span class="char done">ь</span><span class="char done"> </span><span class="char cursor">т</span><span class="char">е</span><span class="char">п</span><span class="char">л</span><span class="char">о</span><span class="char"> </span><span class="char">і</span><span class="char"> </span><span class="char">я</span><span class="char">с</span><span class="char">к</span><span class="char">р</span><span class="char">а</span><span class="char">в</span><span class="char">о</span>
+    </div>
+  </div>
+
+  <!-- INPUT FIELD -->
+  <div style="width:100%;max-width:100%">
+    <div class="section-label">Поле вводу (код кімнати)</div>
+    <input class="input-field" type="text" placeholder="Введіть код кімнати…" value="1234" />
+  </div>
+
+  <!-- DIFFICULTY BUTTONS -->
+  <div>
+    <div class="section-label">Рівні складності</div>
+    <div class="diff-row">
+      <button class="diff-btn">🟢<span>Легкий</span></button>
+      <button class="diff-btn active">🟡<span>Середній</span></button>
+      <button class="diff-btn">🔴<span>Складний</span></button>
+    </div>
+  </div>
+
+  <!-- KEYBOARD -->
+  <div>
+    <div class="section-label">Клавіатура (опукла, потрібна клавіша — зелена)</div>
+    <div class="keyboard">
+      <div class="key-row">
+        <div class="key">Й</div><div class="key">Ц</div><div class="key">У</div>
+        <div class="key">К</div><div class="key active">Е</div><div class="key">Н</div>
+        <div class="key">Г</div><div class="key">Ш</div><div class="key">З</div>
+      </div>
+      <div class="key-row">
+        <div class="key">Ф</div><div class="key">І</div><div class="key">В</div>
+        <div class="key">А</div><div class="key">П</div><div class="key">Р</div>
+        <div class="key">О</div><div class="key">Л</div><div class="key">Д</div>
+      </div>
+      <div class="key-row">
+        <div class="key space-key">ПРОБІЛ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div>
+    <div class="section-label">Кнопки (опуклі)</div>
+    <div class="btn-row">
+      <button class="btn btn-primary">← Назад</button>
+      <button class="btn btn-accent">🚀 Розпочати</button>
+      <button class="btn btn-primary">🔊 Звук</button>
+    </div>
+  </div>
+
+</body>
+</html>
